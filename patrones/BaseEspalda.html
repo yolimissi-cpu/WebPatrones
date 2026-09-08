@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Patrón Base Espalda</title>
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+    }
+
+    .medidas {
+        margin-bottom: 20px;
+        padding: 15px;
+        border: 1px solid #ccc;
+        width: fit-content;
+    }
+
+    .medidas label {
+        display: block;
+        margin-bottom: 8px;
+    }
+
+    .medidas input {
+        width: 70px;
+        margin-left: 10px;
+    }
+
+    button {
+        margin-top: 8px;
+        padding: 6px 15px;
+        cursor: pointer;
+    }
+
+    svg {
+        border: 1px solid #ccc;
+        background: white;
+    }
+
+    .linea {
+        fill: none;
+        stroke: black;
+        stroke-width: 0.5;
+    }
+
+    .curva {
+        fill: none;
+        stroke: black;
+        stroke-width: 0.5;
+    }
+
+    .auxiliar {
+        fill: none;
+        stroke: #999;
+        stroke-width: 0.3;
+        stroke-dasharray: 2, 2;
+    }
+
+    .punto {
+        fill: black;
+    }
+
+    .texto {
+        font-size: 5px;
+        fill: black;
+    }
+</style>
+</head>
+
+<body>
+
+<h2>Patrón Base Espalda</h2>
+
+<div class="medidas">
+
+    <label>
+        Talle espalda:
+        <input type="number" id="talle" value="39" step="0.1">
+        cm
+    </label>
+
+    <label>
+        Contorno pecho:
+        <input type="number" id="pecho" value="96" step="0.1">
+        cm
+    </label>
+
+    <label>
+        Ancho espalda:
+        <input type="number" id="ancho" value="38" step="0.1">
+        cm
+    </label>
+
+    <label>
+        Hombro:
+        <input type="number" id="hombro" value="12" step="0.1">
+        cm
+    </label>
+
+    <label>
+        Sisa:
+        <input type="number" id="sisa" value="17" step="0.1">
+        cm
+    </label>
+
+    <button onclick="dibujarPatron()">Generar Patrón</button>
+
+    <button onclick="generarPDF1a1('patron', 'Patron_Base_Espalda.pdf')">
+        Generar PDF
+    </button>
+
+    <button onclick="window.location.href='../index.html'">
+        Volver
+    </button>
+
+</div>
+
+<svg
+    id="patron"
+    xmlns="http://www.w3.org/2000/svg">
+</svg>
+
+
+<script>
+
+function dibujarPatron() {
+
+    // ==========================
+    // MEDIDAS
+    // ==========================
+
+    const talle =
+        parseFloat(document.getElementById("talle").value);
+
+    const pecho =
+        parseFloat(document.getElementById("pecho").value);
+
+    const ancho =
+        parseFloat(document.getElementById("ancho").value);
+
+    const hombro =
+        parseFloat(document.getElementById("hombro").value);
+
+    const sisa =
+        parseFloat(document.getElementById("sisa").value);
+
+
+    // ==========================
+    // CONSTANTES
+    // ==========================
+
+    const bajadaHombro = 5;
+    const bajadaCuello = 2;
+
+
+    // ==========================
+    // CÁLCULOS EN CM
+    // ==========================
+
+    const cuartoPecho = pecho / 4;
+    const medioAncho = ancho / 2;
+
+    const hombroCalculado = hombro - 1;
+
+
+    // ==========================
+    // CONVERSIÓN A MM
+    // ==========================
+
+    const mm = cm => cm * 10;
+
+
+    // ==========================
+    // MÁRGENES
+    // ==========================
+
+    const margenIzq = 20;
+    const margenSup = 20;
+
+
+    // ==========================
+    // PUNTOS
+    // ==========================
+
+    const D = {
+        x: margenIzq,
+        y: margenSup + mm(talle)
+    };
+
+    const A = {
+        x: margenIzq,
+        y: margenSup
+    };
+
+    const B = {
+        x: margenIzq + mm(cuartoPecho),
+        y: margenSup
+    };
+
+    const C = {
+        x: B.x,
+        y: D.y
+    };
+
+    const E = {
+        x: margenIzq + mm(medioAncho),
+        y: A.y
+    };
+
+    const F = {
+        x: E.x,
+        y: D.y
+    };
+
+    const H = {
+        x: E.x - mm(hombroCalculado),
+        y: A.y
+    };
+
+    const I = {
+        x: E.x,
+        y: A.y + mm(bajadaHombro)
+    };
+
+    const G = {
+        x: margenIzq,
+        y: A.y + mm(bajadaCuello)
+    };
+
+    const J = {
+        x: E.x,
+        y: D.y - mm(sisa)
+    };
+
+    const K = {
+        x: B.x,
+        y: J.y
+    };
+
+
+    // ==========================
+    // L
+    //
+    // EXACTAMENTE 2 cm
+    // POR ENCIMA DE J
+    // ==========================
+
+    const L = {
+        x: J.x,
+        y: J.y - mm(2)
+    };
+
+
+    // ==========================
+    // CUELLO H-G
+    // ==========================
+
+    const dxCuello = H.x - G.x;
+
+    const centroCuelloY =
+        (H.y + G.y) / 2 -
+        (dxCuello * dxCuello) /
+        (2 * (H.y - G.y));
+
+    const radioCuello =
+        Math.sqrt(
+            Math.pow(H.x - G.x, 2) +
+            Math.pow(H.y - centroCuelloY, 2)
+        );
+
+
+    // ==================================================
+    // SISA I-L
+    //
+    // Forma larga tipo:
+    //
+    // (
+    //
+    // La salida máxima es exactamente 1 cm.
+    // ==================================================
+
+    const auxiliarX = E.x - mm(1);
+
+    const alturaIL = L.y - I.y;
+
+
+    /*
+        En una curva cúbica cuyos extremos I y L
+        están sobre la misma vertical:
+
+        si los dos controles están a la misma
+        distancia hacia la izquierda, la máxima
+        salida horizontal ocurre en el centro.
+
+        Para que esa salida máxima sea 10 mm,
+        los controles deben separarse:
+
+        10 / 0.75 = 13.333... mm
+    */
+
+    const salidaControles = mm(1) / 0.75;
+
+
+    const control1 = {
+        x: I.x - salidaControles,
+        y: I.y + alturaIL * 0.24
+    };
+
+    const control2 = {
+        x: L.x - salidaControles,
+        y: L.y - alturaIL * 0.15
+    };
+
+
+    // ==================================================
+    // SISA L-K
+    //
+    // ARCO DE CIRCUNFERENCIA.
+    //
+    // El centro está en la vertical de K.
+    // Así la curva termina horizontal en K.
+    // ==================================================
+
+    const dxLK = K.x - L.x;
+    const dyLK = K.y - L.y;
+
+
+    let centroArco2Y;
+    let radioArco2;
+
+
+    if (Math.abs(dyLK) > 0.0001) {
+
+        centroArco2Y =
+            L.y +
+            (
+                dyLK * dyLK -
+                dxLK * dxLK
+            ) /
+            (2 * dyLK);
+
+        radioArco2 =
+            Math.sqrt(
+                Math.pow(L.x - K.x, 2) +
+                Math.pow(L.y - centroArco2Y, 2)
+            );
+
+    } else {
+
+        centroArco2Y = L.y;
+        radioArco2 = Math.abs(dxLK);
+    }
+
+
+    // ==========================
+    // TAMAÑO SVG
+    // ==========================
+
+    const anchoSVG =
+        Math.max(
+            B.x + 20,
+            300
+        );
+
+    const altoSVG =
+        D.y + 20;
+
+
+    const svg =
+        document.getElementById("patron");
+
+
+    svg.setAttribute(
+        "width",
+        anchoSVG + "mm"
+    );
+
+    svg.setAttribute(
+        "height",
+        altoSVG + "mm"
+    );
+
+    svg.setAttribute(
+        "viewBox",
+        `0 0 ${anchoSVG} ${altoSVG}`
+    );
+
+
+    // ==========================
+    // DIBUJO
+    // ==========================
+
+    svg.innerHTML = `
+
+        <!-- RECTÁNGULO -->
+
+        <path
+            class="linea"
+            d="
+                M ${D.x} ${D.y}
+                L ${A.x} ${A.y}
+                L ${B.x} ${B.y}
+                L ${C.x} ${C.y}
+                L ${D.x} ${D.y}
+            "
+        />
+
+
+        <!-- E-F -->
+
+        <path
+            class="linea"
+            d="
+                M ${E.x} ${E.y}
+                L ${F.x} ${F.y}
+            "
+        />
+
+
+        <!-- H-I -->
+
+        <path
+            class="linea"
+            d="
+                M ${H.x} ${H.y}
+                L ${I.x} ${I.y}
+            "
+        />
+
+
+        <!-- CUELLO H-G -->
+
+        <path
+            class="curva"
+            d="
+                M ${H.x} ${H.y}
+
+                A
+                    ${radioCuello}
+                    ${radioCuello}
+                    0 0 1
+                    ${G.x}
+                    ${G.y}
+            "
+        />
+
+
+        <!-- AUXILIAR DE SISA -->
+
+        <path
+            class="auxiliar"
+            d="
+                M ${auxiliarX} ${I.y}
+                L ${auxiliarX} ${L.y}
+            "
+        />
+
+
+        <!-- SISA I-L -->
+
+        <path
+            class="curva"
+            d="
+                M ${I.x} ${I.y}
+
+                C
+                    ${control1.x}
+                    ${control1.y},
+
+                    ${control2.x}
+                    ${control2.y},
+
+                    ${L.x}
+                    ${L.y}
+            "
+        />
+
+
+        <!-- SISA L-K -->
+
+        <path
+            class="curva"
+            d="
+                M ${L.x} ${L.y}
+
+                A
+                    ${radioArco2}
+                    ${radioArco2}
+                    0
+                    0
+                    0
+                    ${K.x}
+                    ${K.y}
+            "
+        />
+
+
+        <!-- PUNTOS -->
+
+        <circle class="punto"
+            cx="${D.x}" cy="${D.y}" r="1.5"/>
+
+        <circle class="punto"
+            cx="${A.x}" cy="${A.y}" r="1.5"/>
+
+        <circle class="punto"
+            cx="${B.x}" cy="${B.y}" r="1.5"/>
+
+        <circle class="punto"
+            cx="${C.x}" cy="${C.y}" r="1.5"/>
+
+        <circle class="punto"
+            cx="${E.x}" cy="${E.y}" r="1.5"/>
+
+        <circle class="punto"
+            cx="${F.x}" cy="${F.y}" r="1.5"/>
+
+        <circle class="punto"
+            cx="${H.x}" cy="${H.y}" r="1.5"/>
+
+        <circle class="punto"
+            cx="${I.x}" cy="${I.y}" r="1.5"/>
+
+        <circle class="punto"
+            cx="${G.x}" cy="${G.y}" r="1.5"/>
+
+        <circle class="punto"
+            cx="${J.x}" cy="${J.y}" r="1.5"/>
+
+        <circle class="punto"
+            cx="${K.x}" cy="${K.y}" r="1.5"/>
+
+        <circle class="punto"
+            cx="${L.x}" cy="${L.y}" r="1.5"/>
+
+
+        <!-- LETRAS -->
+
+        <text class="texto"
+            x="${D.x - 8}"
+            y="${D.y + 5}">D</text>
+
+        <text class="texto"
+            x="${A.x - 8}"
+            y="${A.y - 3}">A</text>
+
+        <text class="texto"
+            x="${B.x + 3}"
+            y="${B.y - 3}">B</text>
+
+        <text class="texto"
+            x="${C.x + 3}"
+            y="${C.y + 5}">C</text>
+
+        <text class="texto"
+            x="${E.x + 3}"
+            y="${E.y - 3}">E</text>
+
+        <text class="texto"
+            x="${F.x + 3}"
+            y="${F.y + 5}">F</text>
+
+        <text class="texto"
+            x="${H.x + 3}"
+            y="${H.y - 3}">H</text>
+
+        <text class="texto"
+            x="${I.x + 3}"
+            y="${I.y - 3}">I</text>
+
+        <text class="texto"
+            x="${G.x - 8}"
+            y="${G.y - 3}">G</text>
+
+        <text class="texto"
+            x="${J.x + 3}"
+            y="${J.y + 5}">J</text>
+
+        <text class="texto"
+            x="${K.x + 3}"
+            y="${K.y - 3}">K</text>
+
+        <text class="texto"
+            x="${L.x + 3}"
+            y="${L.y - 3}">L</text>
+    `;
+}
+
+
+dibujarPatron();
+
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/svg2pdf.js@2.2.1/dist/svg2pdf.umd.min.js"></script>
+
+<script src="../js/generarpdf.js"></script>
+
+</body>
+</html>
