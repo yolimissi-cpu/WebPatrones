@@ -1,0 +1,1060 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+
+<title>Patrón Base Manga</title>
+
+<style>
+
+    body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+    }
+
+    .medidas {
+        margin-bottom: 20px;
+        padding: 15px;
+        border: 1px solid #ccc;
+        width: fit-content;
+    }
+
+    .medidas label {
+        display: block;
+        margin-bottom: 8px;
+    }
+
+    .medidas input {
+        width: 80px;
+        margin-left: 10px;
+    }
+
+    button {
+        margin-top: 8px;
+        margin-right: 8px;
+        padding: 6px 15px;
+        cursor: pointer;
+    }
+
+    svg {
+        border: 1px solid #ccc;
+        background: white;
+    }
+
+    .linea {
+        fill: none;
+        stroke: black;
+        stroke-width: 0.5;
+    }
+
+    .curva {
+        fill: none;
+        stroke: black;
+        stroke-width: 0.5;
+    }
+
+    .guia {
+        fill: none;
+        stroke: #777;
+        stroke-width: 0.3;
+    }
+
+    .auxiliar {
+        fill: none;
+        stroke: #777;
+        stroke-width: 0.3;
+        stroke-dasharray: 2, 2;
+    }
+
+    .punto {
+        fill: black;
+    }
+
+    .texto {
+        font-size: 5px;
+        fill: black;
+    }
+
+</style>
+</head>
+
+<body>
+
+<h2>Patrón Base Manga</h2>
+
+
+<div class="medidas">
+
+    <label>
+        Largo de manga:
+        <input
+            type="number"
+            id="largoManga"
+            value="58"
+            step="0.1">
+        cm
+    </label>
+
+
+    <label>
+        Contorno de brazo:
+        <input
+            type="number"
+            id="contornoBrazo"
+            value="32"
+            step="0.1">
+        cm
+    </label>
+
+
+    <label>
+        Sisa:
+        <input
+            type="number"
+            id="sisa"
+            value="17"
+            step="0.1">
+        cm
+    </label>
+
+
+    <label>
+        Contorno de muñeca:
+        <input
+            type="number"
+            id="contornoMuneca"
+            value="18"
+            step="0.1">
+        cm
+    </label>
+
+
+    <button onclick="dibujarPatron()">
+        Generar patrón
+    </button>
+
+
+    <button
+        onclick="generarPDF1a1(
+            'patron',
+            'Patron_Base_Manga.pdf'
+        )">
+        Generar PDF 1:1
+    </button>
+
+
+    <button
+        onclick="window.location.href='../index.html'">
+        Volver al inicio
+    </button>
+
+</div>
+
+
+<svg
+    id="patron"
+    xmlns="http://www.w3.org/2000/svg">
+</svg>
+
+
+<script>
+
+
+function dibujarPatron() {
+
+
+    // ==========================
+    // MEDIDAS
+    // ==========================
+
+    const largoManga =
+        parseFloat(
+            document.getElementById(
+                "largoManga"
+            ).value
+        );
+
+
+    const contornoBrazo =
+        parseFloat(
+            document.getElementById(
+                "contornoBrazo"
+            ).value
+        );
+
+
+    const sisa =
+        parseFloat(
+            document.getElementById(
+                "sisa"
+            ).value
+        );
+
+
+    const contornoMuneca =
+        parseFloat(
+            document.getElementById(
+                "contornoMuneca"
+            ).value
+        );
+
+
+    // ==========================
+    // CONVERSIÓN
+    // ==========================
+
+    const mm = cm => cm * 10;
+
+
+    // ==========================
+    // CÁLCULOS
+    // ==========================
+
+    const anchoBrazo =
+        (contornoBrazo / 2) + 3;
+
+
+    const anchoMuneca =
+        (contornoMuneca / 2) + 3;
+
+
+    const bajadaPunto5 =
+        sisa - 2;
+
+
+    // ==========================
+    // PUNTOS EN CM
+    //
+    // X hacia la derecha
+    // Y hacia arriba
+    // ==========================
+
+
+    const p1 = {
+        x: 0,
+        y: largoManga
+    };
+
+
+    const p2 = {
+        x: 0,
+        y: 0
+    };
+
+
+    const p3 = {
+        x: anchoBrazo,
+        y: largoManga
+    };
+
+
+    const p4 = {
+        x: anchoBrazo,
+        y: 0
+    };
+
+
+    const p5 = {
+        x: anchoBrazo,
+        y: largoManga - bajadaPunto5
+    };
+
+
+    const p11 = {
+        x: anchoMuneca,
+        y: 0
+    };
+
+
+    // ==========================
+    // FUNCIÓN:
+    // PUNTO SOBRE UN SEGMENTO
+    // ==========================
+
+    function puntoEnSegmento(
+        pA,
+        pB,
+        proporcion
+    ) {
+
+        return {
+
+            x:
+                pA.x +
+                (pB.x - pA.x) *
+                proporcion,
+
+            y:
+                pA.y +
+                (pB.y - pA.y) *
+                proporcion
+
+        };
+    }
+
+
+    // ==========================
+    // PUNTOS 6 Y 7
+    //
+    // Dividen 1-5 en tres partes
+    // ==========================
+
+    const p6 =
+        puntoEnSegmento(
+            p1,
+            p5,
+            1 / 3
+        );
+
+
+    const p7 =
+        puntoEnSegmento(
+            p1,
+            p5,
+            2 / 3
+        );
+
+
+    // ==========================
+    // PUNTO 8
+    //
+    // 3 cm por encima de 6
+    // ==========================
+
+    const p8 = {
+
+        x: p6.x,
+
+        y:
+            p6.y +
+            3
+
+    };
+
+
+    // ==========================
+    // PUNTO 9
+    //
+    // 2 cm por encima de 6
+    // ==========================
+
+    const p9 = {
+
+        x: p6.x,
+
+        y:
+            p6.y +
+            2
+
+    };
+
+
+    // ==========================
+    // PUNTO 10
+    //
+    // PROVISIONAL:
+    // 2 cm por debajo de 7
+    // ==========================
+
+    const p10 = {
+
+        x: p7.x,
+
+        y:
+            p7.y -
+            2
+
+    };
+
+
+    // ==========================
+    // PUNTO 12
+    //
+    // Punto medio de 5-11
+    // ==========================
+
+    const p12 = {
+
+        x:
+            (p5.x + p11.x) / 2,
+
+        y:
+            (p5.y + p11.y) / 2
+
+    };
+
+
+    // ==========================
+    // PUNTO 13
+    //
+    // 1,5 cm a la izquierda
+    // de 12
+    // ==========================
+
+    const p13 = {
+
+        x:
+            p12.x -
+            1.5,
+
+        y:
+            p12.y
+
+    };
+
+
+    // ==========================
+    // LÍMITES DEL LIENZO
+    // ==========================
+
+    const minX = 0;
+
+    const maxX =
+        anchoBrazo;
+
+
+    /*
+        Dejamos 2 cm por debajo
+        para la curva inferior
+        del puño.
+    */
+
+    const minY = -2;
+
+    const maxY =
+        largoManga;
+
+
+    const margenIzq = 20;
+    const margenSup = 20;
+    const margenDer = 20;
+    const margenInf = 20;
+
+
+    // ==========================
+    // COORDENADAS SVG
+    // ==========================
+
+    function xSvg(xCm) {
+
+        return (
+            margenIzq +
+            mm(xCm - minX)
+        );
+    }
+
+
+    function ySvg(yCm) {
+
+        return (
+            margenSup +
+            mm(maxY - yCm)
+        );
+    }
+
+
+    // ==========================
+    // PUNTOS SVG
+    // ==========================
+
+    function convertirPunto(p) {
+
+        return {
+
+            x:
+                xSvg(p.x),
+
+            y:
+                ySvg(p.y)
+
+        };
+    }
+
+
+    const P1 =
+        convertirPunto(p1);
+
+    const P2 =
+        convertirPunto(p2);
+
+    const P3 =
+        convertirPunto(p3);
+
+    const P4 =
+        convertirPunto(p4);
+
+    const P5 =
+        convertirPunto(p5);
+
+    const P6 =
+        convertirPunto(p6);
+
+    const P7 =
+        convertirPunto(p7);
+
+    const P8 =
+        convertirPunto(p8);
+
+    const P9 =
+        convertirPunto(p9);
+
+    const P10 =
+        convertirPunto(p10);
+
+    const P11 =
+        convertirPunto(p11);
+
+    const P12 =
+        convertirPunto(p12);
+
+    const P13 =
+        convertirPunto(p13);
+
+
+    // ==========================
+    // TAMAÑO SVG
+    // ==========================
+
+    const anchoSVG =
+
+        mm(
+            maxX - minX
+        ) +
+
+        margenIzq +
+        margenDer;
+
+
+    const altoSVG =
+
+        mm(
+            maxY - minY
+        ) +
+
+        margenSup +
+        margenInf;
+
+
+    const svg =
+        document.getElementById(
+            "patron"
+        );
+
+
+    svg.setAttribute(
+        "width",
+        anchoSVG + "mm"
+    );
+
+
+    svg.setAttribute(
+        "height",
+        altoSVG + "mm"
+    );
+
+
+    svg.setAttribute(
+        "viewBox",
+        `0 0 ${anchoSVG} ${altoSVG}`
+    );
+
+
+    // ==============================================
+    // CURVA SUAVE QUE PASA POR TODOS LOS PUNTOS
+    //
+    // Convierte una sucesión de puntos en
+    // una curva continua tipo regla francesa.
+    // ==============================================
+
+    function crearCurvaSuave(puntos) {
+
+        let d =
+            `M ${puntos[0].x} ${puntos[0].y}`;
+
+
+        for (
+            let i = 0;
+            i < puntos.length - 1;
+            i++
+        ) {
+
+            const p0 =
+                puntos[
+                    i === 0
+                        ? i
+                        : i - 1
+                ];
+
+
+            const p1 =
+                puntos[i];
+
+
+            const p2 =
+                puntos[i + 1];
+
+
+            const p3 =
+                puntos[
+                    i + 2 <
+                    puntos.length
+                        ? i + 2
+                        : i + 1
+                ];
+
+
+            const c1x =
+                p1.x +
+                (p2.x - p0.x) / 6;
+
+
+            const c1y =
+                p1.y +
+                (p2.y - p0.y) / 6;
+
+
+            const c2x =
+                p2.x -
+                (p3.x - p1.x) / 6;
+
+
+            const c2y =
+                p2.y -
+                (p3.y - p1.y) / 6;
+
+
+            d += `
+
+                C
+                    ${c1x}
+                    ${c1y},
+
+                    ${c2x}
+                    ${c2y},
+
+                    ${p2.x}
+                    ${p2.y}
+
+            `;
+
+        }
+
+
+        return d;
+    }
+
+
+    // ==========================
+    // CURVAS DE SISA
+    // ==========================
+
+    const curvaSisa1 =
+        crearCurvaSuave(
+            [
+                P1,
+                P8,
+                P7,
+                P5
+            ]
+        );
+
+
+    const curvaSisa2 =
+        crearCurvaSuave(
+            [
+                P1,
+                P9,
+                P10,
+                P5
+            ]
+        );
+
+
+    // ==========================
+    // CURVAS DEL PUÑO
+    // ==========================
+
+    const centroPunioX =
+        (P2.x + P11.x) / 2;
+
+
+    const controlPunioSuperior = {
+
+        x:
+            centroPunioX,
+
+        y:
+            ySvg(1)
+    };
+
+
+    const controlPunioInferior = {
+
+        x:
+            centroPunioX,
+
+        y:
+            ySvg(-1)
+    };
+
+
+    // ==========================
+    // DIBUJO
+    // ==========================
+
+    svg.innerHTML = `
+
+
+        <!-- RECTÁNGULO DE CONSTRUCCIÓN -->
+
+        <path
+            class="linea"
+            d="
+                M ${P2.x} ${P2.y}
+                L ${P1.x} ${P1.y}
+                L ${P3.x} ${P3.y}
+                L ${P4.x} ${P4.y}
+                L ${P2.x} ${P2.y}
+            "
+        />
+
+
+        <!-- DIAGONAL 1-5 -->
+
+        <path
+            class="guia"
+            d="
+                M ${P1.x} ${P1.y}
+                L ${P5.x} ${P5.y}
+            "
+        />
+
+
+        <!-- ===================================
+             SISA 1
+             CURVA CONTINUA 1-8-7-5
+             =================================== -->
+
+        <path
+            class="curva"
+            d="${curvaSisa1}"
+        />
+
+
+        <!-- ===================================
+             SISA 2
+             CURVA CONTINUA 1-9-10-5
+             =================================== -->
+
+        <path
+            class="curva"
+            d="${curvaSisa2}"
+        />
+
+
+        <!-- ===================================
+             5-11
+             RECTA CONTINUA
+             =================================== -->
+
+        <path
+            class="linea"
+            d="
+                M ${P5.x} ${P5.y}
+                L ${P11.x} ${P11.y}
+            "
+        />
+
+
+        <!-- ===================================
+             5-13-11
+             DOS RECTAS DISCONTINUAS
+             =================================== -->
+
+        <path
+            class="auxiliar"
+            d="
+                M ${P5.x} ${P5.y}
+                L ${P13.x} ${P13.y}
+                L ${P11.x} ${P11.y}
+            "
+        />
+
+
+        <!-- ===================================
+             PUÑO SUPERIOR
+             CURVA DISCONTINUA
+             =================================== -->
+
+        <path
+            class="auxiliar"
+            d="
+                M ${P2.x} ${P2.y}
+
+                Q
+                    ${controlPunioSuperior.x}
+                    ${controlPunioSuperior.y},
+
+                    ${P11.x}
+                    ${P11.y}
+            "
+        />
+
+
+        <!-- ===================================
+             PUÑO INFERIOR
+             CURVA DISCONTINUA
+             =================================== -->
+
+        <path
+            class="auxiliar"
+            d="
+                M ${P2.x} ${P2.y}
+
+                Q
+                    ${controlPunioInferior.x}
+                    ${controlPunioInferior.y},
+
+                    ${P11.x}
+                    ${P11.y}
+            "
+        />
+
+
+        <!-- ==========================
+             PUNTOS
+             ========================== -->
+
+        <circle
+            class="punto"
+            cx="${P1.x}"
+            cy="${P1.y}"
+            r="1.5"
+        />
+
+
+        <circle
+            class="punto"
+            cx="${P2.x}"
+            cy="${P2.y}"
+            r="1.5"
+        />
+
+
+        <circle
+            class="punto"
+            cx="${P3.x}"
+            cy="${P3.y}"
+            r="1.5"
+        />
+
+
+        <circle
+            class="punto"
+            cx="${P4.x}"
+            cy="${P4.y}"
+            r="1.5"
+        />
+
+
+        <circle
+            class="punto"
+            cx="${P5.x}"
+            cy="${P5.y}"
+            r="1.5"
+        />
+
+
+        <circle
+            class="punto"
+            cx="${P6.x}"
+            cy="${P6.y}"
+            r="1.5"
+        />
+
+
+        <circle
+            class="punto"
+            cx="${P7.x}"
+            cy="${P7.y}"
+            r="1.5"
+        />
+
+
+        <circle
+            class="punto"
+            cx="${P8.x}"
+            cy="${P8.y}"
+            r="1.5"
+        />
+
+
+        <circle
+            class="punto"
+            cx="${P9.x}"
+            cy="${P9.y}"
+            r="1.5"
+        />
+
+
+        <circle
+            class="punto"
+            cx="${P10.x}"
+            cy="${P10.y}"
+            r="1.5"
+        />
+
+
+        <circle
+            class="punto"
+            cx="${P11.x}"
+            cy="${P11.y}"
+            r="1.5"
+        />
+
+
+        <circle
+            class="punto"
+            cx="${P12.x}"
+            cy="${P12.y}"
+            r="1.5"
+        />
+
+
+        <circle
+            class="punto"
+            cx="${P13.x}"
+            cy="${P13.y}"
+            r="1.5"
+        />
+
+
+        <!-- ==========================
+             ETIQUETAS
+             ========================== -->
+
+        <text
+            class="texto"
+            x="${P1.x - 8}"
+            y="${P1.y - 3}">
+            1
+        </text>
+
+
+        <text
+            class="texto"
+            x="${P2.x - 8}"
+            y="${P2.y + 5}">
+            2
+        </text>
+
+
+        <text
+            class="texto"
+            x="${P3.x + 3}"
+            y="${P3.y - 3}">
+            3
+        </text>
+
+
+        <text
+            class="texto"
+            x="${P4.x + 3}"
+            y="${P4.y + 5}">
+            4
+        </text>
+
+
+        <text
+            class="texto"
+            x="${P5.x + 3}"
+            y="${P5.y + 2}">
+            5
+        </text>
+
+
+        <text
+            class="texto"
+            x="${P6.x + 3}"
+            y="${P6.y + 2}">
+            6
+        </text>
+
+
+        <text
+            class="texto"
+            x="${P7.x + 3}"
+            y="${P7.y + 2}">
+            7
+        </text>
+
+
+        <text
+            class="texto"
+            x="${P8.x + 3}"
+            y="${P8.y - 3}">
+            8
+        </text>
+
+
+        <text
+            class="texto"
+            x="${P9.x + 3}"
+            y="${P9.y + 2}">
+            9
+        </text>
+
+
+        <text
+            class="texto"
+            x="${P10.x - 10}"
+            y="${P10.y + 5}">
+            10
+        </text>
+
+
+        <text
+            class="texto"
+            x="${P11.x - 3}"
+            y="${P11.y + 12}">
+            11
+        </text>
+
+
+        <text
+            class="texto"
+            x="${P12.x + 3}"
+            y="${P12.y + 2}">
+            12
+        </text>
+
+
+        <text
+            class="texto"
+            x="${P13.x - 10}"
+            y="${P13.y + 2}">
+            13
+        </text>
+
+    `;
+}
+
+
+dibujarPatron();
+
+</script>
+
+
+<script
+    src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js">
+</script>
+
+<script
+    src="https://cdn.jsdelivr.net/npm/svg2pdf.js@2.2.1/dist/svg2pdf.umd.min.js">
+</script>
+
+<script src="../js/generarpdf.js"></script>
+
+
+</body>
+</html>
